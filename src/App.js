@@ -1,5 +1,5 @@
 import React from 'react';
-import {Link, Navigate, Outlet, Route, Routes, useParams} from 'react-router-dom';
+import {Link, Navigate, Outlet, useParams, useRoutes} from 'react-router-dom';
 
 const users = [0, 1, 2, 3, 4];
 const isUserExist = (userId) => users.some(uid => uid === Number(userId));
@@ -69,24 +69,56 @@ function UserEditPage() {
    );
 }
 
+const routes = [
+   {
+      path: "/",
+      element: <MainPage/>,
+   },
+   {
+      path: "users",
+      element: <UsersLayout/>,
+      children: [
+         {
+            path: "",
+            element: <UsersList/>
+         },
+         {
+            path: ":userId",
+            children: [
+               {
+                  path: "",
+                  element: <Navigate to={'profile'}/>
+               },
+               {
+                  path: "profile",
+                  element: <UserPage/>
+               },
+               {
+                  path: "edit",
+                  element: <UserEditPage/>
+               },
+               {
+                  path: "*",
+                  element: <Navigate to={'profile'}/>
+               }
+            ]
+         }
+      ]
+   },
+   {
+      path: '*',
+      element: <Navigate to={"/"}/>
+   }
+];
+
+
 function App() {
+   const elements = useRoutes(routes);
 
    return (<>
          <h1>App Layout v6</h1>
          <Link to='/users'>Users list Page</Link>
-         <Routes>
-            <Route index element={<MainPage/>}/>
-            <Route path='users' element={<UsersLayout/>}>
-               <Route index element={<UsersList/>}/>
-               <Route path=':userId'>
-                  <Route index element={<Navigate to={'profile'}/>}/>
-                  <Route path='profile' element={<UserPage/>}/>
-                  <Route path='edit' element={<UserEditPage/>}/>
-                  <Route path='*' element={<Navigate to={'profile'}/>}/>
-               </Route>
-            </Route>
-            <Route path='*' element={<Navigate to='/'/>}/>
-         </Routes>
+         {elements}
       </>
    );
 }
